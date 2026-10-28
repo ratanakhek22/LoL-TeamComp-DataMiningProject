@@ -1,0 +1,27 @@
+# Secrets: never commit your Riot API key
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.ipynb_checkpoints/
+
+# Data and model outputs (too large / regenerable)
+data/raw/
+data/interim/
+*.parquet
+*.db
+*.sqlite
+models/*.pt
+models/*.pth
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
