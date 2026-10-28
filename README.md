@@ -37,7 +37,8 @@ No API calls are made by any public-facing component. Any demo will use trained 
 
 - [ ] Explore pro data from Oracle's Elixir (games per patch, champion pair counts)
 - [ ] PMI co-occurrence baseline for champion synergy
-- [ ] Solo queue crawler (Riot API, Master+, current patch)
+- [x] Solo queue crawler (Riot API, Master+, current patch)
+- [ ] Collect ~100k ranked matches
 - [ ] Coherence model v1: averaged embeddings + linear layer + softmax
 - [ ] Popularity-adjusted coherence scores and sanity checks on known combos
 - [ ] Archetype clustering of team embeddings
@@ -48,11 +49,29 @@ No API calls are made by any public-facing component. Any demo will use trained 
 
 ## Setup
 
-API keys are read from a local `.env` file, which is git-ignored and never committed.
+```bash
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env             # then put your Riot API key in .env
+```
 
+API keys are read from the local `.env` file, which is git-ignored and never committed.
+
+## Collecting ranked data
+
+```bash
+python -m collect.riot_crawler --check                     # test the key
+python -m collect.riot_crawler --platform na1 --days 14    # start crawling
 ```
-RIOT_API_KEY=your-key-here
-```
+
+The crawler pulls Master, Grandmaster, and Challenger players, collects their recent ranked solo queue match IDs, and fetches each match once. It stores only draft-level fields (champions, positions, bans, patch, duration, winner) in `data/raw/ranked.db`. Remakes are skipped.
+
+- **Resumable:** stop with Ctrl+C at any time; running the same command picks up where it left off.
+- **Rate limited** to personal-key limits (about 2,500–3,000 matches per hour per region).
+- **Useful options:** `--patch 15.21` keeps one patch only, `--max-matches 500` for a short test run, `--platform euw1` to crawl another region (regions can run in parallel in separate terminals).
+
+Run the tests with `pytest`.
 
 ## Disclaimer
 
