@@ -120,6 +120,22 @@ def test_retries_after_429():
     assert clock.t >= 7
 
 
+def test_retries_after_connection_reset():
+    import requests
+
+    class FlakySession(FakeSession):
+        def get(self, url, params=None, headers=None, timeout=None):
+            self.calls.append(url)
+            if len(self.calls) <= 2:
+                raise requests.exceptions.ConnectionError("Connection aborted.")
+            return FakeResponse(200, {"ok": True})
+
+    clock = FakeClock()
+    session = FlakySession([], {}, {})
+    assert client_for(session, clock).get("na1", "/x") == {"ok": True}
+    assert len(session.calls) == 3
+
+
 def test_bad_key_raises():
     clock = FakeClock()
     session = FakeSession([], {}, {}, script=[FakeResponse(403)])

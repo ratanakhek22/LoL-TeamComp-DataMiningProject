@@ -87,7 +87,7 @@ class RiotClient:
     """
 
     def __init__(self, api_key: str, session=None, limits=None,
-                 clock=time.monotonic, sleep=time.sleep, max_retries: int = 5):
+                 clock=time.monotonic, sleep=time.sleep, max_retries: int = 8):
         self.api_key = api_key
         self.session = session or requests.Session()
         self.limits = limits
@@ -107,9 +107,17 @@ class RiotClient:
         for attempt in range(self.max_retries):
             self._limiter(host).wait()
             self.request_count += 1
-            resp = self.session.get(
-                url, params=params, headers={"X-Riot-Token": self.api_key}, timeout=30
-            )
+            try:
+                resp = self.session.get(
+                    url, params=params, headers={"X-Riot-Token": self.api_key}, timeout=30
+                )
+            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+                # Wi-Fi blips, dropped connections, timeouts: wait and try again
+                backoff = min(5 * 2 ** attempt, 120)
+                print(f"  network error ({type(e).__name__}), retrying in {backoff}s",
+                      file=sys.stderr)
+                self.sleep(backoff)
+                continue
             status = resp.status_code
             if status == 200:
                 return resp.json()
