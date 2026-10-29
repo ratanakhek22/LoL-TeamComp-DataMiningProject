@@ -73,6 +73,13 @@ The crawler pulls Master, Grandmaster, and Challenger players, collects their re
 
 Run the tests with `pytest`.
 
+### Notes from the first crawl (October 2026)
+
+- 4 regions (`kr`, `euw1`, `na1`, `vn2`) with `--days 42` ran for about 24 hours and collected 155k+ usable matches. That's more than needed.
+- Patch coverage: 16.21 ≈ 76k, 16.20 ≈ 68k, 16.19 ≈ 11k, 16.18 ≈ 0.3k. The oldest patches barely filled in because players' most recent games come first.
+- **Next time:** aim for the last 3 patches only (about `--days 28`), and cap each region with `--max-matches 30000` so the crawl finishes overnight.
+- Long runs hit occasional dropped connections; the crawler now retries these automatically.
+
 ## Disclaimer
 
 CompSense isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.
